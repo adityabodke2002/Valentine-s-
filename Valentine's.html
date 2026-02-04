@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Will You Be My Valentine? 💜</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  height: 100vh;
+  background: linear-gradient(135deg,#ffe0eb,#ffd1e1,#ffc1d6,#ffb3cc);
+  overflow: hidden;
+}
+
+/* 💜 floating background hearts */
+.bg-heart {
+  position: fixed;
+  bottom: -40px;
+  opacity: 0.35;
+  animation: floatBg linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes floatBg {
+  from { transform: translateY(0); opacity: 0.5; }
+  to   { transform: translateY(-120vh); opacity: 0; }
+}
+
+/* 📸 collage */
+.collage {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: auto;   /* 🔑 ensure hover works */
+}
+
+
+.collage img {
+  position: absolute;
+  width: 150px;
+  height: auto;
+  background: #fff;
+  padding: 6px;
+  border-radius: 10px;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.22);
+  pointer-events: none; /* intentional now */
+}
+
+
+
+.collage img:hover {
+  transform: scale(1.5) rotate(0deg);
+  box-shadow: 0 35px 70px rgba(0,0,0,0.5);
+  z-index: 9999;          /* 🔥 force top */
+}
+
+
+/* 💌 center card */
+.overlay {
+  position: relative;
+  z-index: 10;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  background: rgba(255,255,255,.97);
+  padding: 36px 34px;
+  border-radius: 24px;
+  max-width: 460px;
+  text-align: center;
+  box-shadow: 0 25px 45px rgba(0,0,0,.25);
+  animation: pop .6s ease;
+}
+
+@keyframes pop {
+  from { transform: scale(.9); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+h1 { color: #ff4d6d; }
+p { font-size: 17px; }
+
+button {
+  margin: 14px 8px 0;
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+}
+button:hover { transform: scale(1.08); }
+
+.yes { background:#ff4d6d; color:#fff; }
+.no  { background:#eee; }
+
+.hidden { display: none; }
+
+/* 💜 celebration hearts */
+.heart {
+  position: absolute;
+  bottom: -20px;
+  font-size: 24px;
+  animation: floatUp 4s linear;
+  pointer-events: none;
+}
+@keyframes floatUp {
+  to { transform: translateY(-800px); opacity: 0; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="collage" id="collage"></div>
+
+<div class="overlay">
+  <div class="card" id="card">
+    <h1>Hey you 💜</h1>
+    <p>Through all my memories,</p>
+    <p><strong>only by your side I see myself…</strong></p>
+    <p>So now I have one important question 👀</p>
+    <h2>Will you be my Valentine? 💘</h2>
+
+    <button class="yes" onclick="yesClicked()">YES 🥰</button>
+    <button class="no" id="noBtn" onclick="moveNo()">No 🙄</button>
+  </div>
+
+  <div class="card hidden" id="success">
+    <h1>YAYYY!!! 🎉💖</h1>
+    <p>Like I would ever let you say no! 😘</p>
+    <p>Happy Valentine’s Day, my lovey dovey 💜</p>
+  </div>
+</div>
+
+<script>
+    const collage = document.getElementById("collage");
+    
+    const images = [
+      "img1 (1).jpg","img1 (2).jpg","img1 (3).jpg","img1 (4).jpg","img1 (5).jpg",
+      "img1 (6).jpg","img1 (7).jpg","img1 (8).jpg","img1 (9).jpg","img1 (10).jpg",
+      "img1 (11).jpg","img1 (12).jpg","img1 (13).jpg","img1 (14).jpg","img1 (15).jpg",
+      "img1 (16).jpg","img1 (17).jpg","img1 (18).jpg","img1 (19).jpg","img1 (20).jpg",
+      "img1 (21).jpg","img1 (22).jpg","img1 (23).jpg","img1 (24).jpg","img1 (25).jpg",
+      "img1 (26).jpg","img1 (27).jpg","img1 (28).jpg","img1 (29).jpg","img1 (30).jpg",
+      "img1 (31).jpg","img1 (32).jpg","img1 (33).jpg","img1 (34).jpg","img1 (35).jpg",
+      "img1 (36).jpg","img1 (37).jpg","img1 (38).jpg","img1 (39).jpg","img1 (40).jpg"
+    ];
+    
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    
+    const photos = [];
+    
+    images.forEach(src => {
+      const img = document.createElement("img");
+      img.src = src;
+    
+      const x = Math.random() * (vw - 160);
+      const y = Math.random() * (vh - 160);
+    
+      img.style.left = x + "px";
+      img.style.top = y + "px";
+      img.style.transform = `rotate(${Math.random()*20 - 10}deg)`;
+    
+      collage.appendChild(img);
+    
+      photos.push({
+        img,
+        x,
+        y,
+        vx: (Math.random() - 0.5) * 6,
+        vy: (Math.random() - 0.5) * 6,
+        driftTimer: Math.random() * 1000
+      });
+    });
+    
+    function animate(time) {
+      photos.forEach(p => {
+    
+        // slow random drift change
+        if (time - p.driftTimer > 2000) {
+          p.vx += (Math.random() - 0.5) * 0.05;
+          p.vy += (Math.random() - 0.5) * 0.05;
+          p.driftTimer = time;
+        }
+    
+        p.x += p.vx;
+        p.y += p.vy;
+    
+        // wrap around screen (so they pass under the card)
+        if (p.x < -180) p.x = vw;
+        if (p.x > vw) p.x = -180;
+        if (p.y < -180) p.y = vh;
+        if (p.y > vh) p.y = -180;
+    
+        p.img.style.left = p.x + "px";
+        p.img.style.top = p.y + "px";
+      });
+    
+      requestAnimationFrame(animate);
+    }
+    
+// 💜 background floating hearts
+function createBgHeart() {
+  const heart = document.createElement("div");
+  heart.className = "bg-heart";
+  heart.innerText = "💜";
+
+  const size = 14 + Math.random() * 100;
+  heart.style.fontSize = size + "px";
+  heart.style.left = Math.random() * 100 + "vw";
+  heart.style.animationDuration = 8 + Math.random() * 8 + "s";
+
+  document.body.appendChild(heart);
+
+  setTimeout(() => heart.remove(), 16000);
+}
+
+// spawn hearts continuously
+setInterval(createBgHeart, 500);
+
+
+    requestAnimationFrame(animate);
+    
+    // NO button dodge
+    function moveNo() {
+      const btn = document.getElementById("noBtn");
+      btn.style.position = "absolute";
+      btn.style.left = Math.random() * (vw - 120) + "px";
+      btn.style.top = Math.random() * (vh - 60) + "px";
+    }
+    
+    // YES magic
+    function yesClicked() {
+      card.classList.add("hidden");
+      success.classList.remove("hidden");
+    
+      for (let i = 0; i < 50; i++) {
+        const h = document.createElement("div");
+        h.className = "heart";
+        h.innerText = "💜";
+        h.style.left = Math.random() * vw + "px";
+        document.body.appendChild(h);
+        setTimeout(() => h.remove(), 4000);
+      }
+    }
+    </script>
+        
+            
+</body>
+</html>
